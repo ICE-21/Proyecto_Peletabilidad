@@ -4,6 +4,7 @@ Configuración general del proyecto PelletAI
 
 from pathlib import Path
 
+
 # ============================================================
 # RUTAS
 # ============================================================
@@ -16,17 +17,86 @@ MODEL_PATH = ROOT / "modelos"
 
 LOG_PATH = ROOT / "logs"
 
+
 # ============================================================
-# MODELO
+# DATOS DEL PROYECTO
 # ============================================================
+
+# Variable objetivo del modelo
 
 TARGET = "%Alimentador"
 
-FAMILIAS = ["T3"]
+
+# Familias de productos a analizar
+# Equivalente a:
+# familias = ["T"] en el notebook original
+
+FAMILIAS = ["T"]
+
+
+# Rango de Batch utilizado en el entrenamiento
+
+BATCH_MIN = 11
+
+BATCH_MAX = 101
+
+
+
+# ============================================================
+# COLUMNAS DEL DATASET
+# ============================================================
+
+# Columnas que no entran al modelo
+
+DROP_COLUMNS = [
+
+    # Variables identificadoras
+    "Codigo",
+    "Batch",
+
+    # Ingredientes excluidos del modelo
+    "M82076IB",
+    "M80822IA",
+    "M80710IB",
+    "M80032NB",
+    "M70202IB",
+    "M60013NB",
+    "M60000NA",
+    "M51012NB",
+    "M51003IB",
+    "M50805MB",
+    "M50802MB",
+    "M50701NA",
+    "M50536MB",
+    "M50534MB",
+    "M50523MAT",
+    "M50522MA",
+    "M50504MA",
+    "M50231LB",
+    "M50113MB",
+    "M50009MB",
+    "M40715NB",
+    "M40662MB",
+    "M40602IA",
+    "M40141LA",
+    "M40031LA",
+    "M40002QA",
+    "M10302MA",
+    "M10301MA",
+    "M080006"
+
+]
+
+
+# ============================================================
+# ENTRENAMIENTO
+# ============================================================
 
 RANDOM_STATE = 42
 
 TEST_SIZE = 0.20
+
+
 
 # ============================================================
 # CATBOOST
@@ -34,20 +104,20 @@ TEST_SIZE = 0.20
 
 CATBOOST_PARAMS = {
 
-    "iterations":800,
+    "iterations": 800,
 
-    "learning_rate":0.01,
+    "learning_rate": 0.01,
 
-    "depth":5,
+    "depth": 5,
 
-    "l2_leaf_reg":1,
+    "l2_leaf_reg": 1,
 
-    "border_count":128,
+    "border_count": 128,
 
-    "loss_function":"RMSE",
+    "loss_function": "RMSE",
 
-    "verbose":False,
+    "verbose": False,
 
-    "random_seed":42
+    "random_seed": RANDOM_STATE
 
 }
