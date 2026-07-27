@@ -104,20 +104,20 @@ TEST_SIZE = 0.20
 
 CATBOOST_PARAMS = {
 
-    "iterations": 800,
+    "iterations":300,
 
-    "learning_rate": 0.01,
+    "learning_rate":0.05,
 
-    "depth": 5,
+    "depth":4,
 
-    "l2_leaf_reg": 1,
+    "l2_leaf_reg":10,
 
-    "border_count": 128,
+    "border_count":64,
 
-    "loss_function": "RMSE",
+    "loss_function":"RMSE",
 
-    "verbose": False,
+    "verbose":False,
 
-    "random_seed": RANDOM_STATE
+    "random_seed":RANDOM_STATE
 
 }
