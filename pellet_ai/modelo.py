@@ -1,8 +1,8 @@
 """
 Modelo predictivo PelletAI
 
-Encapsula entrenamiento y evaluación
-del modelo CatBoost.
+Encapsula entrenamiento, evaluación
+e interpretación del modelo CatBoost.
 """
 
 
@@ -11,16 +11,19 @@ import pandas as pd
 import shap
 import json
 import pickle
+
 from datetime import datetime
-from pathlib import Path
+
 
 from catboost import CatBoostRegressor
+
 
 from sklearn.model_selection import (
     train_test_split,
     RepeatedKFold,
     cross_val_score
 )
+
 
 from sklearn.metrics import (
     mean_absolute_error,
@@ -35,6 +38,7 @@ from .config import (
     RANDOM_STATE,
     MODEL_PATH
 )
+
 
 
 class PelletAI:
@@ -54,11 +58,16 @@ class PelletAI:
 
 
 
+    # ========================================================
+    # ENTRENAMIENTO
+    # ========================================================
+
     def train(self, X, y):
 
         """
         Entrena el modelo CatBoost
         """
+
 
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
 
@@ -78,8 +87,11 @@ class PelletAI:
 
 
         self.modelo.fit(
+
             self.X_train,
+
             self.y_train
+
         )
 
 
@@ -87,34 +99,59 @@ class PelletAI:
 
 
 
+    # ========================================================
+    # EVALUACIÓN
+    # ========================================================
+
     def evaluate(self):
 
         """
         Calcula métricas del modelo
         """
 
+
+        if self.modelo is None:
+
+            raise Exception(
+                "El modelo no ha sido entrenado."
+            )
+
+
         predicciones = self.modelo.predict(
+
             self.X_test
+
         )
 
 
         mae = mean_absolute_error(
+
             self.y_test,
+
             predicciones
+
         )
 
 
         rmse = np.sqrt(
+
             mean_squared_error(
+
                 self.y_test,
+
                 predicciones
+
             )
+
         )
 
 
         r2 = r2_score(
+
             self.y_test,
+
             predicciones
+
         )
 
 
@@ -131,14 +168,23 @@ class PelletAI:
 
         return self.metrics
 
+
+
+    # ========================================================
+    # VALIDACIÓN CRUZADA
+    # ========================================================
+
     def cross_validate(self, X, y):
 
         """
         Validación cruzada del modelo
         """
 
+
         modelo_cv = CatBoostRegressor(
+
             **CATBOOST_PARAMS
+
         )
 
 
@@ -181,6 +227,8 @@ class PelletAI:
 
         return resultado
 
+
+
     # ========================================================
     # IMPORTANCIA DE VARIABLES
     # ========================================================
@@ -210,7 +258,10 @@ class PelletAI:
 
         )
 
+
         return importancia
+
+
 
     # ========================================================
     # EXPLICABILIDAD SHAP
@@ -219,21 +270,36 @@ class PelletAI:
     def explain(self, X):
 
         """
-        Genera valores SHAP del modelo
+        Genera valores SHAP
         """
 
-        explainer = shap.TreeExplainer(
-            self.modelo
+
+        if self.modelo is None:
+
+            raise Exception(
+                "El modelo no ha sido entrenado."
+            )
+
+
+        explainer = shap.Explainer(
+
+            self.modelo,
+
+            self.X_train
+
         )
 
 
         shap_values = explainer(
+
             X
+
         )
 
 
         return shap_values
-    
+
+
 
     # ========================================================
     # PREDICCIÓN
@@ -245,14 +311,19 @@ class PelletAI:
         Predice nuevas formulaciones
         """
 
+
         if self.modelo is None:
 
             raise Exception(
+
                 "El modelo no ha sido entrenado."
+
             )
 
 
         return self.modelo.predict(X)
+
+
 
     # ========================================================
     # GUARDAR MODELO
@@ -266,69 +337,142 @@ class PelletAI:
         """
 
 
+        if self.modelo is None:
+
+            raise Exception(
+
+                "No existe un modelo entrenado."
+
+            )
+
+
         if not self.metrics:
+
             self.evaluate()
-    
-        MODEL_PATH.mkdir(exist_ok=True)
 
 
-        # Guardar CatBoost
 
-        self.modelo.save_model(
+        MODEL_PATH.mkdir(
 
-            MODEL_PATH / "modelo_actual.cbm"
+            exist_ok=True
 
         )
 
 
+
+        # -----------------------------
+        # Guardar modelo CatBoost
+        # -----------------------------
+
+
+        self.modelo.save_model(
+
+            str(
+
+                MODEL_PATH / "modelo_actual.cbm"
+
+            )
+
+        )
+
+
+
+        # -----------------------------
         # Guardar variables
+        # -----------------------------
+
 
         with open(
-            MODEL_PATH / "variables.pkl",
+
+            str(
+
+                MODEL_PATH / "variables.pkl"
+
+            ),
+
             "wb"
+
         ) as f:
 
+
             pickle.dump(
+
                 list(X.columns),
+
                 f
+
             )
 
 
+
+        # -----------------------------
         # Metadata
+        # -----------------------------
+
 
         metadata = {
 
+
             "fecha_entrenamiento":
-                datetime.now().strftime("%Y-%m-%d %H:%M"),
+
+                datetime.now().strftime(
+
+                    "%Y-%m-%d %H:%M"
+
+                ),
+
 
             "n_registros":
+
                 len(X),
 
+
             "n_variables":
+
                 len(X.columns),
 
+
             "MAE":
-                self.metrics.get("MAE", None),
-            
+
+                float(self.metrics["MAE"]),
+
+
             "RMSE":
-                self.metrics.get("RMSE", None),
-            
+
+                float(self.metrics["RMSE"]),
+
+
             "R2":
-                self.metrics.get("R2", None)
+
+                float(self.metrics["R2"])
 
         }
-        
+
+
 
         with open(
-            MODEL_PATH / "metadata.json",
+
+            str(
+
+                MODEL_PATH / "metadata.json"
+
+            ),
+
             "w"
+
         ) as f:
 
+
             json.dump(
+
                 metadata,
+
                 f,
+
                 indent=4
+
             )
+
 
 
         return metadata
