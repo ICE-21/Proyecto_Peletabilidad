@@ -110,45 +110,44 @@ class FeedbackAnalyzer:
 
     def bias(self):
 
-    """
-    Evalúa tendencia del modelo.
-    """
-
-    if self.df is None:
-
-        self.load()
-
-
-    promedio = self.df["error"].mean()
-
-
-    resultado = {
-
-        "bias": promedio,
-
-        "interpretacion": None
-
-    }
-
-
-    if promedio > 0:
-
-        resultado["interpretacion"] = (
-            f"El modelo subestima "
-            f"en promedio {promedio:.2f}%"
-        )
-
-
-    else:
-
-        resultado["interpretacion"] = (
-            f"El modelo sobreestima "
-            f"en promedio {abs(promedio):.2f}%"
-        )
-
-
-    return resultado
-
+        """
+        Evalúa tendencia del modelo.
+        """
+    
+        if self.df is None:
+    
+            self.load()
+    
+    
+        promedio = self.df["error"].mean()
+    
+    
+        resultado = {
+    
+            "bias": promedio,
+    
+            "interpretacion": None
+    
+        }
+    
+    
+        if promedio > 0:
+    
+            resultado["interpretacion"] = (
+                f"El modelo subestima "
+                f"en promedio {promedio:.2f}%"
+            )
+    
+    
+        else:
+    
+            resultado["interpretacion"] = (
+                f"El modelo sobreestima "
+                f"en promedio {abs(promedio):.2f}%"
+            )
+    
+    
+        return resultado
 
     # ========================================================
     # DECISIÓN DE REENTRENAMIENTO
