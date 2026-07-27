@@ -557,6 +557,75 @@ class PelletAI:
         return formula
 
     # ========================================================
+    # SHAP DE UNA FORMULACIÓN
+    # ========================================================
+
+    def _formula_shap(self, formula):
+
+        """
+        Calcula los valores SHAP para una formulación.
+        """
+
+        explainer = shap.Explainer(
+
+            self.modelo,
+
+            self.X_train
+
+        )
+
+        shap_values = explainer(
+
+            formula
+
+        )
+
+        return shap_values
+
+    # ========================================================
+    # TOP VARIABLES SHAP
+    # ========================================================
+
+    def _top_shap(self, formula, top=5):
+
+        """
+        Obtiene las variables con mayor impacto SHAP.
+        """
+
+        shap_values = self._formula_shap(formula)
+
+        explicacion = pd.DataFrame({
+
+            "Ingrediente": formula.columns,
+
+            "Impacto": shap_values.values[0]
+
+        })
+
+        explicacion["Impacto_abs"] = (
+            explicacion["Impacto"].abs()
+        )
+
+        explicacion = explicacion.sort_values(
+
+            "Impacto_abs",
+
+            ascending=False
+
+        )
+
+        positivos = explicacion[
+            explicacion["Impacto"] > 0
+        ].head(top)
+
+        negativos = explicacion[
+            explicacion["Impacto"] < 0
+        ].head(top)
+
+        return positivos, negativos
+        
+
+    # ========================================================
     # PREDICCIÓN DE FORMULACIÓN
     # ========================================================
 
@@ -582,3 +651,51 @@ class PelletAI:
 
 
         return float(prediccion[0])
+
+    # ========================================================
+    # SEMÁFORO DE PELETABILIDAD
+    # ========================================================
+
+    def semaforo(self, valor):
+
+        """
+        Clasifica el % Alimentador esperado.
+        """
+
+        if valor >= 60:
+
+            return "🟢 Excelente"
+
+        elif valor >= 55:
+
+            return "🟡 Bueno"
+
+        elif valor >= 50:
+
+            return "🟠 Riesgo moderado"
+
+        else:
+
+            return "🔴 Bajo rendimiento"
+
+    # ========================================================
+    # REPORTE DE PREDICCIÓN
+    # ========================================================
+
+    def predict_report(self, formula):
+
+        """
+        Genera un reporte completo para una formulación.
+        """
+
+        prediccion = self.predict_formula(formula)
+
+        reporte = {
+
+            "prediccion": round(prediccion, 2),
+
+            "semaforo": self.semaforo(prediccion)
+
+        }
+
+        return reporte
