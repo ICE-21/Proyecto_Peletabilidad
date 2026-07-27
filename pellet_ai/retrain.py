@@ -64,11 +64,11 @@ class Retrainer:
 
 
 
-     # ========================================================
-     # LIMPIAR FEEDBACK
-     # ========================================================
+    # ========================================================
+    # LIMPIAR FEEDBACK
+    # ========================================================
 
-     def clean_feedback(self):
+    def clean_feedback(self):
 
         """
         Prepara feedback para que tenga
@@ -79,38 +79,38 @@ class Retrainer:
         columnas_eliminar = [
 
             "fecha",
-    
+
             "prediccion",
-    
+
             "error"
-    
+
         ]
-    
-    
+
+
         self.feedback = self.feedback.drop(
-    
+
             columns=columnas_eliminar,
-    
+
             errors="ignore"
-    
+
         )
-    
-    
-        # Convertir resultado real
-        # al nombre de la variable objetivo
-    
+
+
+        # Cambiar nombre del resultado real
+
         if "real" in self.feedback.columns:
-    
+
             self.feedback = self.feedback.rename(
-    
+
                 columns={
                     "real": "%Alimentador"
                 }
-    
+
             )
-    
-    
+
+
         return self.feedback
+
 
 
     # ========================================================
