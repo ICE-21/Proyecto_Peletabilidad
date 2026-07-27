@@ -1,3 +1,1 @@
-from .modelo import PelletAI
-
-from .datos import GestorDatos
+from .data import DataManager
