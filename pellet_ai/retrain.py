@@ -150,3 +150,73 @@ class Retrainer:
 
 
         return combinado
+    # ========================================================
+    # COMPARAR MODELOS
+    # ========================================================
+
+    def compare_models(
+        self,
+        metrics_old,
+        metrics_new
+    ):
+
+        """
+        Compara modelo actual contra nuevo modelo.
+
+        Reglas:
+        - Menor MAE es mejor
+        - Menor RMSE es mejor
+        - Mayor R2 es mejor
+        """
+
+
+        mejora_mae = (
+            metrics_new["MAE"]
+            <
+            metrics_old["MAE"]
+        )
+
+
+        mejora_rmse = (
+            metrics_new["RMSE"]
+            <
+            metrics_old["RMSE"]
+        )
+
+
+        mejora_r2 = (
+            metrics_new["R2"]
+            >
+            metrics_old["R2"]
+        )
+
+
+        aprobado = (
+
+            mejora_mae
+            and
+            mejora_rmse
+            and
+            mejora_r2
+
+        )
+
+
+        resultado = {
+
+            "modelo_actual": metrics_old,
+
+            "modelo_nuevo": metrics_new,
+
+            "mejora_MAE": mejora_mae,
+
+            "mejora_RMSE": mejora_rmse,
+
+            "mejora_R2": mejora_r2,
+
+            "aceptar_modelo": aprobado
+
+        }
+
+
+        return resultado
