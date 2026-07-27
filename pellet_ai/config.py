@@ -1,36 +1,36 @@
 """
-Configuración general del proyecto
+Configuración general del proyecto PelletAI
 """
 
 from pathlib import Path
 
-#====================================================
-# CARPETAS DEL PROYECTO
-#====================================================
+# ============================================================
+# RUTAS
+# ============================================================
 
 ROOT = Path(__file__).resolve().parent.parent
 
-DATOS = ROOT / "datos"
+DATA_PATH = ROOT / "datos"
 
-MODELOS = ROOT / "modelos"
+MODEL_PATH = ROOT / "modelos"
 
-LOGS = ROOT / "logs"
+LOG_PATH = ROOT / "logs"
 
-#====================================================
+# ============================================================
 # MODELO
-#====================================================
-
-RANDOM_STATE = 42
-
-TEST_SIZE = 0.20
+# ============================================================
 
 TARGET = "%Alimentador"
 
 FAMILIAS = ["T3"]
 
-#====================================================
+RANDOM_STATE = 42
+
+TEST_SIZE = 0.20
+
+# ============================================================
 # CATBOOST
-#====================================================
+# ============================================================
 
 CATBOOST_PARAMS = {
 
@@ -48,6 +48,6 @@ CATBOOST_PARAMS = {
 
     "verbose":False,
 
-    "random_seed":RANDOM_STATE
+    "random_seed":42
 
 }
