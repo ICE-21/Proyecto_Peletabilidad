@@ -508,3 +508,50 @@ class PelletAI:
 
 
         return self.modelo
+
+    # ========================================================
+    # PREPARAR FÓRMULA
+    # ========================================================
+
+    def prepare_formula(self, formula):
+
+        """
+        Prepara una formulación para que tenga exactamente
+        las mismas variables utilizadas durante el entrenamiento.
+        """
+
+        if not isinstance(formula, pd.DataFrame):
+
+            raise TypeError(
+                "La fórmula debe ser un DataFrame de pandas."
+            )
+
+
+        ruta_variables = MODEL_PATH / "variables.pkl"
+
+
+        if not ruta_variables.exists():
+
+            raise FileNotFoundError(
+                "No existe variables.pkl. Debe entrenar o cargar un modelo."
+            )
+
+
+        with open(
+            ruta_variables,
+            "rb"
+        ) as f:
+
+            variables = pickle.load(f)
+
+
+        formula = formula.reindex(
+
+            columns=variables,
+
+            fill_value=0
+
+        )
+
+
+        return formula
