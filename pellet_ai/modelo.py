@@ -716,19 +716,21 @@ class PelletAI:
 
         reporte = {
 
-            "prediccion": round(prediccion, 2),
+    "prediccion": round(prediccion, 2),
 
-            "semaforo": estado,
+    "semaforo": estado,
 
-            "top_positivos": positivos.to_dict(
-                orient="records"
-            ),
+    "formula": formula,
 
-            "top_negativos": negativos.to_dict(
-                orient="records"
-            )
+    "top_positivos": positivos.to_dict(
+        orient="records"
+    ),
 
-        }
+    "top_negativos": negativos.to_dict(
+        orient="records"
+    )
+
+    }
 
 
         return reporte
