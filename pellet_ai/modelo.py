@@ -9,6 +9,10 @@ del modelo CatBoost.
 import numpy as np
 import pandas as pd
 import shap
+import json
+import pickle
+from datetime import datetime
+from pathlib import Path
 
 from catboost import CatBoostRegressor
 
@@ -28,9 +32,9 @@ from sklearn.metrics import (
 from .config import (
     CATBOOST_PARAMS,
     TEST_SIZE,
-    RANDOM_STATE
+    RANDOM_STATE,
+    MODEL_PATH
 )
-
 
 
 class PelletAI:
@@ -249,3 +253,81 @@ class PelletAI:
 
 
         return self.modelo.predict(X)
+
+    # ========================================================
+    # GUARDAR MODELO
+    # ========================================================
+
+    def save(self, X):
+
+        """
+        Guarda modelo entrenado,
+        variables utilizadas y metadata
+        """
+
+
+        MODEL_PATH.mkdir(
+            exist_ok=True
+        )
+
+
+        # Guardar CatBoost
+
+        self.modelo.save_model(
+
+            MODEL_PATH / "modelo_actual.cbm"
+
+        )
+
+
+        # Guardar variables
+
+        with open(
+            MODEL_PATH / "variables.pkl",
+            "wb"
+        ) as f:
+
+            pickle.dump(
+                list(X.columns),
+                f
+            )
+
+
+        # Metadata
+
+        metadata = {
+
+            "fecha_entrenamiento":
+                datetime.now().strftime("%Y-%m-%d %H:%M"),
+
+            "n_registros":
+                len(X),
+
+            "n_variables":
+                len(X.columns),
+
+            "MAE":
+                self.metrics.get("MAE"),
+
+            "RMSE":
+                self.metrics.get("RMSE"),
+
+            "R2":
+                self.metrics.get("R2")
+
+        }
+
+
+        with open(
+            MODEL_PATH / "metadata.json",
+            "w"
+        ) as f:
+
+            json.dump(
+                metadata,
+                f,
+                indent=4
+            )
+
+
+        return metadata
