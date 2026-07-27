@@ -10,7 +10,11 @@ import numpy as np
 
 from catboost import CatBoostRegressor
 
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import (
+    train_test_split,
+    RepeatedKFold,
+    cross_val_score
+)
 
 from sklearn.metrics import (
     mean_absolute_error,
@@ -121,12 +125,72 @@ class PelletAI:
 
         return self.metrics
 
+    def cross_validate(self, X, y):
 
+        """
+        Validación cruzada del modelo
+        """
+
+        modelo_cv = CatBoostRegressor(
+            **CATBOOST_PARAMS
+        )
+
+
+        cv = RepeatedKFold(
+
+            n_splits=5,
+
+            n_repeats=2,
+
+            random_state=RANDOM_STATE
+
+        )
+
+
+        scores = cross_val_score(
+
+            modelo_cv,
+
+            X,
+
+            y,
+
+            cv=cv,
+
+            scoring="r2"
+
+        )
+
+
+        resultado = {
+
+            "scores": scores,
+
+            "mean_r2": scores.mean(),
+
+            "std_r2": scores.std()
+
+        }
+
+
+        return resultado
+
+
+    # ========================================================
+    # PREDICCIÓN
+    # ========================================================
 
     def predict(self, X):
 
         """
         Predice nuevas formulaciones
         """
+
+        if self.modelo is None:
+
+            raise Exception(
+                "El modelo no ha sido entrenado."
+            )
+
 
         return self.modelo.predict(X)
