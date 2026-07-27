@@ -476,3 +476,35 @@ class PelletAI:
 
 
         return metadata
+
+    # ========================================================
+    # CARGAR MODELO
+    # ========================================================
+
+    def load(self):
+
+        """
+        Carga un modelo CatBoost previamente guardado
+        """
+
+        ruta_modelo = MODEL_PATH / "modelo_actual.cbm"
+
+
+        if not ruta_modelo.exists():
+
+            raise FileNotFoundError(
+                "No existe un modelo guardado."
+            )
+
+
+        self.modelo = CatBoostRegressor()
+
+
+        self.modelo.load_model(
+
+            str(ruta_modelo)
+
+        )
+
+
+        return self.modelo
