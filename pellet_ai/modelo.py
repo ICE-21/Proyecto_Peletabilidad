@@ -7,6 +7,7 @@ del modelo CatBoost.
 
 
 import numpy as np
+import pandas as pd
 
 from catboost import CatBoostRegressor
 
@@ -175,6 +176,36 @@ class PelletAI:
 
         return resultado
 
+    # ========================================================
+    # IMPORTANCIA DE VARIABLES
+    # ========================================================
+
+    def feature_importance(self, X):
+
+        """
+        Calcula importancia de variables
+        según CatBoost
+        """
+
+
+        importancia = pd.DataFrame({
+
+            "Variable": X.columns,
+
+            "Importancia": self.modelo.feature_importances_
+
+        })
+
+
+        importancia = importancia.sort_values(
+
+            "Importancia",
+
+            ascending=False
+
+        )
+
+        return importancia
 
     # ========================================================
     # PREDICCIÓN
