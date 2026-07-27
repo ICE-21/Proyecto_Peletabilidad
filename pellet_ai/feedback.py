@@ -40,9 +40,7 @@ class FeedbackManager:
         con el resultado real obtenido.
         """
 
-
-        registro = formula.copy()
-
+        registro = formula.iloc[0].to_dict()
 
         registro["fecha"] = (
             datetime.now()
