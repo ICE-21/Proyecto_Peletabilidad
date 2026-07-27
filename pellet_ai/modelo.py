@@ -678,24 +678,57 @@ class PelletAI:
 
             return "🔴 Bajo rendimiento"
 
-    # ========================================================
-    # REPORTE DE PREDICCIÓN
+       # ========================================================
+    # REPORTE COMPLETO DE PREDICCIÓN
     # ========================================================
 
-    def predict_report(self, formula):
+    def predict_report(self, formula, top=5):
 
         """
-        Genera un reporte completo para una formulación.
+        Genera un reporte completo de una formulación.
         """
 
+        if self.modelo is None:
+
+            raise Exception(
+                "Debe cargar o entrenar un modelo."
+            )
+
+
+        # Preparar fórmula
+        formula = self.prepare_formula(formula)
+
+
+        # Predicción
         prediccion = self.predict_formula(formula)
+
+
+        # Semáforo
+        estado = self.semaforo(prediccion)
+
+
+        # SHAP
+        positivos, negativos = self._top_shap(
+            formula,
+            top=top
+        )
+
 
         reporte = {
 
             "prediccion": round(prediccion, 2),
 
-            "semaforo": self.semaforo(prediccion)
+            "semaforo": estado,
+
+            "top_positivos": positivos.to_dict(
+                orient="records"
+            ),
+
+            "top_negativos": negativos.to_dict(
+                orient="records"
+            )
 
         }
+
 
         return reporte
