@@ -110,31 +110,44 @@ class FeedbackAnalyzer:
 
     def bias(self):
 
-        """
-        Evalúa si el modelo tiende
-        a sobreestimar o subestimar.
-        """
+    """
+    Evalúa tendencia del modelo.
+    """
+
+    if self.df is None:
+
+        self.load()
 
 
-        promedio = self.df["error"].mean()
+    promedio = self.df["error"].mean()
 
 
+    resultado = {
 
-        if promedio > 0:
+        "bias": promedio,
 
-            return (
-                "El modelo subestima "
-                f"en promedio {promedio:.2f}%"
-            )
+        "interpretacion": None
+
+    }
 
 
-        else:
+    if promedio > 0:
 
-            return (
-                "El modelo sobreestima "
-                f"en promedio {abs(promedio):.2f}%"
-            )
+        resultado["interpretacion"] = (
+            f"El modelo subestima "
+            f"en promedio {promedio:.2f}%"
+        )
 
+
+    else:
+
+        resultado["interpretacion"] = (
+            f"El modelo sobreestima "
+            f"en promedio {abs(promedio):.2f}%"
+        )
+
+
+    return resultado
 
 
     # ========================================================
