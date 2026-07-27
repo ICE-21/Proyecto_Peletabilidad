@@ -266,9 +266,10 @@ class PelletAI:
         """
 
 
-        MODEL_PATH.mkdir(
-            exist_ok=True
-        )
+        if not self.metrics:
+            self.evaluate()
+    
+        MODEL_PATH.mkdir(exist_ok=True)
 
 
         # Guardar CatBoost
@@ -307,16 +308,16 @@ class PelletAI:
                 len(X.columns),
 
             "MAE":
-                self.metrics.get("MAE"),
-
+                self.metrics.get("MAE", None),
+            
             "RMSE":
-                self.metrics.get("RMSE"),
-
+                self.metrics.get("RMSE", None),
+            
             "R2":
-                self.metrics.get("R2")
+                self.metrics.get("R2", None)
 
         }
-
+        
 
         with open(
             MODEL_PATH / "metadata.json",
