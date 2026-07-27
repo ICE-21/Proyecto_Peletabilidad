@@ -8,6 +8,7 @@ del modelo CatBoost.
 
 import numpy as np
 import pandas as pd
+import shap
 
 from catboost import CatBoostRegressor
 
@@ -206,6 +207,29 @@ class PelletAI:
         )
 
         return importancia
+
+    # ========================================================
+    # EXPLICABILIDAD SHAP
+    # ========================================================
+
+    def explain(self, X):
+
+        """
+        Genera valores SHAP del modelo
+        """
+
+        explainer = shap.TreeExplainer(
+            self.modelo
+        )
+
+
+        shap_values = explainer(
+            X
+        )
+
+
+        return shap_values
+    
 
     # ========================================================
     # PREDICCIÓN
