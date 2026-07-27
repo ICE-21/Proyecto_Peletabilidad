@@ -15,6 +15,8 @@ DATA_PATH = ROOT / "datos"
 
 MODEL_PATH = ROOT / "modelos"
 
+VERSION_PATH = MODEL_PATH / "versiones"
+
 LOG_PATH = ROOT / "logs"
 
 
