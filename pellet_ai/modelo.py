@@ -555,3 +555,30 @@ class PelletAI:
 
 
         return formula
+
+    # ========================================================
+    # PREDICCIÓN DE FORMULACIÓN
+    # ========================================================
+
+    def predict_formula(self, formula):
+
+        """
+        Predice el % Alimentador de una nueva formulación.
+        """
+
+        if self.modelo is None:
+
+            raise Exception(
+                "Debe cargar o entrenar un modelo antes de predecir."
+            )
+
+
+        # Preparar fórmula
+        formula = self.prepare_formula(formula)
+
+
+        # Predicción
+        prediccion = self.modelo.predict(formula)
+
+
+        return float(prediccion[0])
