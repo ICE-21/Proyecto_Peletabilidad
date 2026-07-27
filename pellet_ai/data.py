@@ -132,6 +132,9 @@ class DataManager:
 
         return self.df.describe()
 
+    def info(self):
+
+        return self.df.info()
 
 
     def null_values(self):
