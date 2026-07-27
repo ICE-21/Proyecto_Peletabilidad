@@ -36,7 +36,8 @@ from .config import (
     CATBOOST_PARAMS,
     TEST_SIZE,
     RANDOM_STATE,
-    MODEL_PATH
+    MODEL_PATH,
+    VERSION_PATH
 )
 
 
@@ -678,7 +679,7 @@ class PelletAI:
 
             return "🔴 Bajo rendimiento"
 
-       # ========================================================
+    # ========================================================
     # REPORTE COMPLETO DE PREDICCIÓN
     # ========================================================
 
@@ -734,3 +735,80 @@ class PelletAI:
 
 
         return reporte
+        # ========================================================
+    # GUARDAR VERSION DEL MODELO
+    # ========================================================
+
+    def save_version(self):
+
+        """
+        Guarda una copia histórica
+        del modelo entrenado.
+        """
+
+        if self.modelo is None:
+
+            raise Exception(
+                "No existe modelo entrenado."
+            )
+
+
+        VERSION_PATH.mkdir(
+            exist_ok=True
+        )
+
+
+        fecha = datetime.now().strftime(
+            "%Y%m%d_%H%M"
+        )
+
+
+        nombre = (
+            f"modelo_{fecha}.cbm"
+        )
+
+
+        ruta = VERSION_PATH / nombre
+
+
+        self.modelo.save_model(
+
+            str(ruta)
+
+        )
+
+
+        return str(ruta)
+        # ========================================================
+    # PROMOVER MODELO GANADOR
+    # ========================================================
+
+    def promote_model(self):
+
+        """
+        Copia el modelo ganador
+        como modelo_actual.
+        """
+
+        if self.modelo is None:
+
+            raise Exception(
+                "No existe modelo entrenado."
+            )
+
+
+        destino = (
+            MODEL_PATH /
+            "modelo_actual.cbm"
+        )
+
+
+        self.modelo.save_model(
+
+            str(destino)
+
+        )
+
+
+        return str(destino)
+
