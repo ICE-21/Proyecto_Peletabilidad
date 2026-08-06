@@ -11,6 +11,7 @@ import pandas as pd
 import shap
 import json
 import pickle
+from .catalogos import Catalogos
 
 from datetime import datetime
 
@@ -510,6 +511,25 @@ class PelletAI:
 
         return self.modelo
 
+        # ========================================================
+    # VARIABLES DEL MODELO
+    # ========================================================
+
+    def variables(self):
+
+        """
+        Devuelve la lista de variables utilizadas
+        por el modelo.
+        """
+
+        ruta = MODEL_PATH / "variables.pkl"
+
+        with open(ruta, "rb") as f:
+
+            variables = pickle.load(f)
+
+        return variables
+
     # ========================================================
     # PREPARAR FÓRMULA
     # ========================================================
@@ -595,17 +615,43 @@ class PelletAI:
 
         shap_values = self._formula_shap(formula)
 
+        catalogo = Catalogos()
+
+
         explicacion = pd.DataFrame({
 
-            "Ingrediente": formula.columns,
+            "Codigo": formula.columns,
 
             "Impacto": shap_values.values[0]
 
         })
 
+
+        explicacion["Ingrediente"] = (
+            explicacion["Codigo"]
+            .apply(catalogo.nombre)
+        )
+
         explicacion["Impacto_abs"] = (
             explicacion["Impacto"].abs()
         )
+
+        # ==========================================
+        # Mostrar solo ingredientes utilizados
+        # ==========================================
+
+        valores = formula.iloc[0]
+
+
+        explicacion["Valor"] = (
+            explicacion["Codigo"]
+            .map(valores)
+        )
+
+
+        explicacion = explicacion[
+            explicacion["Valor"] > 0
+        ]
 
         explicacion = explicacion.sort_values(
 
@@ -721,7 +767,7 @@ class PelletAI:
 
     "semaforo": estado,
 
-    "formula": formula,
+    #"formula": formula,  #mostrar la formula completa puede ser demasiado largo
 
     "top_positivos": positivos.to_dict(
         orient="records"

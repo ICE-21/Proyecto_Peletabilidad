@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 # ============================================================
-# RUTAS
+# RUTAS DEL PROYECTO
 # ============================================================
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -21,42 +21,52 @@ LOG_PATH = ROOT / "logs"
 
 
 # ============================================================
+# ARCHIVOS DEL MODELO
+# ============================================================
+
+MODELO_ACTUAL = (
+    MODEL_PATH /
+    "modelo_actual.cbm"
+)
+
+MODELO_CANDIDATO = (
+    MODEL_PATH /
+    "modelo_candidato.cbm"
+)
+
+
+# ============================================================
 # DATOS DEL PROYECTO
 # ============================================================
 
-# Variable objetivo del modelo
+# Variable objetivo
 
 TARGET = "%Alimentador"
 
 
-# Familias de productos a analizar
-# Equivalente a:
-# familias = ["T"] en el notebook original
+# Familias de productos utilizadas
 
 FAMILIAS = ["T"]
 
 
-# Rango de Batch utilizado en el entrenamiento
+# Rango de Batch utilizado
 
 BATCH_MIN = 11
 
 BATCH_MAX = 101
 
 
-
 # ============================================================
-# COLUMNAS DEL DATASET
+# COLUMNAS EXCLUIDAS DEL MODELO
 # ============================================================
-
-# Columnas que no entran al modelo
 
 DROP_COLUMNS = [
 
-    # Variables identificadoras
+    # Identificación
     "Codigo",
     "Batch",
 
-    # Ingredientes excluidos del modelo
+    # Ingredientes descartados
     "M82076IB",
     "M80822IA",
     "M80710IB",
@@ -91,7 +101,7 @@ DROP_COLUMNS = [
 
 
 # ============================================================
-# ENTRENAMIENTO
+# PARÁMETROS DE ENTRENAMIENTO
 # ============================================================
 
 RANDOM_STATE = 42
@@ -99,27 +109,95 @@ RANDOM_STATE = 42
 TEST_SIZE = 0.20
 
 
-
 # ============================================================
-# CATBOOST
+# PARÁMETROS CATBOOST
 # ============================================================
 
 CATBOOST_PARAMS = {
 
-    "iterations":300,
+    "iterations": 300,
 
-    "learning_rate":0.05,
+    "learning_rate": 0.05,
 
-    "depth":4,
+    "depth": 4,
 
-    "l2_leaf_reg":10,
+    "l2_leaf_reg": 10,
 
-    "border_count":64,
+    "border_count": 64,
 
-    "loss_function":"RMSE",
+    "loss_function": "RMSE",
 
-    "verbose":False,
+    "verbose": False,
 
-    "random_seed":RANDOM_STATE
+    "random_seed": RANDOM_STATE
 
 }
+
+
+# ============================================================
+# REGLAS DE SELECCIÓN DEL MODELO
+# ============================================================
+
+MODEL_SELECTION = {
+
+    # --------------------------------------------------------
+    # Cantidad mínima de feedbacks
+    # antes de permitir un reentrenamiento
+    # --------------------------------------------------------
+
+    "MIN_FEEDBACK": 30,
+
+
+    # --------------------------------------------------------
+    # Mejora mínima requerida
+    # (% respecto al modelo actual)
+    # --------------------------------------------------------
+
+    "MIN_MAE_IMPROVEMENT": 1.5,
+
+    "MIN_RMSE_IMPROVEMENT": 1.5,
+
+
+    # --------------------------------------------------------
+    # Incremento mínimo aceptado
+    # del coeficiente R²
+    # --------------------------------------------------------
+
+    "MIN_R2_IMPROVEMENT": 0.01,
+
+
+    # --------------------------------------------------------
+    # Puntaje mínimo para aceptar
+    # un nuevo modelo
+    # (0 - 100)
+    # --------------------------------------------------------
+
+    "MIN_GLOBAL_SCORE": 70,
+
+
+    # --------------------------------------------------------
+    # Ponderación de métricas
+    # La suma debe ser 100
+    # --------------------------------------------------------
+
+    "WEIGHTS": {
+
+        "MAE": 45,
+
+        "RMSE": 30,
+
+        "R2": 25
+
+    }
+
+}
+
+
+# ============================================================
+# VERSIONADO DE MODELOS
+# ============================================================
+
+# Cantidad máxima de modelos históricos
+# que se conservarán automáticamente.
+
+MAX_VERSION_HISTORY = 50

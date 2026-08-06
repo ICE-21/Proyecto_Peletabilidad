@@ -146,3 +146,21 @@ class DataManager:
     def duplicated(self):
 
         return self.df.duplicated().sum()
+
+    # ========================================================
+    # FLUJO COMPLETO PARA ENTRENAMIENTO
+    # ========================================================
+
+    def get_training_data(self):
+
+
+        self.load_excel()
+
+
+        self.clean()
+
+
+        self.filter_data()
+
+
+        return self.prepare_training_data()

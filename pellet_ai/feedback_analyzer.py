@@ -1,14 +1,12 @@
 """
-Analizador de retroalimentación PelletAI
+Analizador de retroalimentación PelletAI.
 
 Evalúa el desempeño del modelo
-con los nuevos lotes registrados.
+con resultados reales de producción.
 """
 
 
 import pandas as pd
-
-from pathlib import Path
 
 from .config import DATA_PATH
 
@@ -19,31 +17,35 @@ class FeedbackAnalyzer:
 
     def __init__(self):
 
-        self.file = DATA_PATH / "feedback.xlsx"
+        self.archivo = (
+            DATA_PATH /
+            "feedback.xlsx"
+        )
 
         self.df = None
 
 
 
     # ========================================================
-    # CARGAR DATOS DE FEEDBACK
+    # CARGAR DATOS
     # ========================================================
 
-    def load(self):
+    def cargar(self):
 
-        """
-        Carga los resultados reales registrados.
-        """
 
-        if not self.file.exists():
+        if not self.archivo.exists():
 
             raise FileNotFoundError(
+
                 "No existe feedback.xlsx"
+
             )
 
 
         self.df = pd.read_excel(
-            self.file
+
+            self.archivo
+
         )
 
 
@@ -51,25 +53,41 @@ class FeedbackAnalyzer:
 
 
 
+
+
     # ========================================================
     # RESUMEN GENERAL
     # ========================================================
 
-    def summary(self):
-
-        """
-        Resumen del comportamiento
-        del modelo.
-        """
+    def resumen(self):
 
 
         if self.df is None:
 
-            self.load()
+            self.cargar()
 
 
 
-        resumen = {
+        if self.df.empty:
+
+
+            return {
+
+                "lotes_registrados": 0,
+
+                "error_promedio": 0,
+
+                "error_abs_promedio": 0,
+
+                "error_maximo": 0,
+
+                "error_minimo": 0
+
+            }
+
+
+
+        return {
 
 
             "lotes_registrados":
@@ -77,30 +95,35 @@ class FeedbackAnalyzer:
                 len(self.df),
 
 
+
             "error_promedio":
 
-                self.df["error"].mean(),
+                self.df["Error"].mean(),
+
 
 
             "error_abs_promedio":
 
-                self.df["error"].abs().mean(),
+                self.df["Error"]
+                .abs()
+                .mean(),
+
 
 
             "error_maximo":
 
-                self.df["error"].max(),
+                self.df["Error"].max(),
+
 
 
             "error_minimo":
 
-                self.df["error"].min()
+                self.df["Error"].min()
 
 
         }
 
 
-        return resumen
 
 
 
@@ -108,82 +131,283 @@ class FeedbackAnalyzer:
     # SESGO DEL MODELO
     # ========================================================
 
-    def bias(self):
+    def sesgo(self):
 
-        """
-        Evalúa tendencia del modelo.
-        """
-    
+
         if self.df is None:
-    
-            self.load()
-    
-    
-        promedio = self.df["error"].mean()
-    
-    
-        resultado = {
-    
-            "bias": promedio,
-    
-            "interpretacion": None
-    
-        }
-    
-    
+
+            self.cargar()
+
+
+
+        if self.df.empty:
+
+
+            return {
+
+                "bias": 0,
+
+                "interpretacion":
+
+                    "No existen datos suficientes."
+
+            }
+
+
+
+        promedio = (
+
+            self.df["Error"]
+            .mean()
+
+        )
+
+
+
         if promedio > 0:
-    
-            resultado["interpretacion"] = (
+
+
+            mensaje = (
+
                 f"El modelo subestima "
-                f"en promedio {promedio:.2f}%"
+                f"{promedio:.2f}% en promedio."
+
             )
-    
-    
+
+
         else:
-    
-            resultado["interpretacion"] = (
+
+
+            mensaje = (
+
                 f"El modelo sobreestima "
-                f"en promedio {abs(promedio):.2f}%"
+                f"{abs(promedio):.2f}% en promedio."
+
             )
-    
-    
-        return resultado
+
+
+
+        return {
+
+
+            "bias": promedio,
+
+
+            "interpretacion": mensaje
+
+
+        }
+
 
     # ========================================================
     # DECISIÓN DE REENTRENAMIENTO
     # ========================================================
 
-    def should_retrain(
+    def necesita_reentrenamiento(
 
         self,
 
-        min_lotes=50,
+        minimo_lotes=50,
 
         max_error=5
 
     ):
 
-        """
-        Define si conviene reentrenar.
-        """
 
-
-        resumen = self.summary()
+        datos = self.resumen()
 
 
 
-        if (
+        return (
 
-            resumen["lotes_registrados"] >= min_lotes
+            datos["lotes_registrados"]
+
+            >=
+
+            minimo_lotes
+
 
             and
 
-            resumen["error_abs_promedio"] > max_error
 
-        ):
+            datos["error_abs_promedio"]
 
-            return True
+            >
+
+            max_error
+
+        )
+        
+    # ========================================================
+    # DATOS PARA GRÁFICOS
+    # ========================================================
+
+    def datos_graficos(self):
+
+
+        if self.df is None:
+
+            self.cargar()
+
+
+        if self.df.empty:
+
+            return pd.DataFrame()
 
 
 
-        return False
+        columnas = [
+
+            "Fecha",
+
+            "Prediccion",
+
+            "Resultado_Real",
+
+            "Error"
+
+        ]
+
+
+        return self.df[columnas]
+    
+        # ========================================================
+    # EVOLUCIÓN DEL ERROR
+    # ========================================================
+
+    def evolucion_error(self):
+
+
+        if self.df is None:
+
+            self.cargar()
+
+
+        if self.df.empty:
+
+            return pd.DataFrame()
+
+
+
+        datos = self.df.copy()
+
+
+        datos["Fecha"] = pd.to_datetime(
+
+            datos["Fecha"]
+
+        )
+
+
+        datos = datos.sort_values(
+
+            by="Fecha"
+
+        )
+
+
+        datos["Error_Absoluto"] = (
+
+            datos["Error"]
+            .abs()
+
+        )
+
+
+        return datos[
+            [
+                "Fecha",
+                "Error",
+                "Error_Absoluto"
+            ]
+        ]
+        
+            # ========================================================
+    # PRECISIÓN OPERACIONAL
+    # ========================================================
+
+    def precision_operacional(
+
+        self,
+
+        tolerancia=5
+
+    ):
+
+
+        if self.df is None:
+
+            self.cargar()
+
+
+
+        if self.df.empty:
+
+            return {
+
+                "total":0,
+
+                "aciertos":0,
+
+                "precision":0
+
+            }
+
+
+
+        datos = self.df.copy()
+
+
+
+        datos["Error_Abs"] = (
+
+            datos["Error"]
+            .abs()
+
+        )
+
+
+
+        aciertos = (
+
+            datos["Error_Abs"]
+
+            <=
+
+            tolerancia
+
+        ).sum()
+
+
+
+        total = len(datos)
+
+
+
+        precision = (
+
+            aciertos / total * 100
+
+        )
+
+
+
+        return {
+
+
+            "total":
+
+                total,
+
+
+            "aciertos":
+
+                aciertos,
+
+
+            "precision":
+
+                precision
+
+
+        }

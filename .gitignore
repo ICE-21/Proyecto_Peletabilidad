@@ -240,3 +240,26 @@ datos/*.xlsx
 datos/*.xls
 
 *.db
+
+# Entorno Python
+venv/
+.env/
+__pycache__/
+*.pyc
+
+# Datos reales de producción
+datos/
+*.xlsx
+
+# Modelos entrenados
+modelos/
+*.cbm
+
+# Logs
+*.log
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Jupyter
+.ipynb_checkpoints/
